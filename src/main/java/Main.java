@@ -13,7 +13,7 @@ public class Main {
 	* 						!!!!!IMPORTANT!!!!
 	*
 	* 	Before implementing anything read the boolean methods like charIsLetter()
-	*	Using these will make the  implementation much cleaner
+	*	Using these will make the  implementation much cleaner ;)
 	*
 	*
 	* */
