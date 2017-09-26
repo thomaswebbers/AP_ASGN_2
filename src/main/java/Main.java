@@ -42,6 +42,7 @@ public class Main {
 		//check if identifer is followed by "="
 		//check if expresion is valid with parseExpression()
 	}
+	
 
 	void  parsePrintStatement(){
 		//skip first character(already checked that it is ? in parseStatement
@@ -49,7 +50,7 @@ public class Main {
 	}
 
 
-	void parseEpression(){
+	void parseExpression(){
 		//use additive operator as delimeter to get individual terms
 		//parse individual terms with parseTerm()
 		//apply logic to terms if terms are valid
@@ -127,10 +128,10 @@ public class Main {
 	private boolean nextCharEqualsInput(Scanner in, char c) { return in.hasNext(Pattern.quote(c + "")); }
 
 
-	private boolean nextCharIsAdditiveOperator(Scanner in) { return  in.hasNext("\\+ | \\- | \\|");}
+	private boolean nextCharIsAdditiveOperator(Scanner in) { return  in.hasNext("\\+ | \\- | \\|"); }
 
 
-	private boolean nextCharIsMultiplicativeOperator(Scanner in) {}
+	private boolean nextCharIsMultiplicativeOperator(Scanner in) { return  in.hasNext("\\*"); }
 
     private void start() {
         Scanner in = new Scanner(System.in);

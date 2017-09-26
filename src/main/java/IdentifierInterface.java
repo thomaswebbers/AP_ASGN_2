@@ -1,4 +1,4 @@
-/**	@elements : String value
+/**	@elements : char value
  *	@structure : singular
  *	@domain : 	any combination of characters
  *	@constructor - Identifier();
@@ -9,8 +9,24 @@
  **/
 
 public interface IdentifierInterface {
+    /** @precondition -
+     *  @postcondition -
+     *  @success - char is valid
+     *  @failure - return stating char was invalid
+     */
+    void readValidChar();
+
+
+    /** @precondition -
+     *  @postcondition - char is added to identifier
+     */
+    void addChar();
+
+
 	/**	@precondition -
      *  @postcondition - returns the String value that the Identifier stores.
      **/
     String toString();
 }
+
+
