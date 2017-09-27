@@ -1,8 +1,10 @@
-class Identifier {
-	private String identifier;
+import java.util.Scanner;
 
-	public Identifier(String name) {
-		identifier = name;
+class Identifier implements  IdentifierInterface {
+	private StringBuffer identifier;
+
+	Identifier(){
+		identifier = new StringBuffer();
 	}
 
 	@Override
@@ -21,7 +23,41 @@ class Identifier {
 		}
 	}
 
+	@Override
+	public boolean readValidChar(String readCharacter) {
+		Scanner character = new Scanner(readCharacter);
+		if(identifier.length() == 0){
+			if(charIsLetter(character)){
+				addChar(character.next());
+			}else{
+				return false;
+			}
+		}else {
+			if(charIsNumber(character) || charIsLetter(character)){
+				addChar(character.next());
+			}else{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
+	@Override
+	public void addChar(String character) {
+		identifier.append(character);
+	}
+
 	public String toString() {
-		return identifier;
+		return identifier.toString();
+	}
+
+	private boolean charIsLetter(Scanner in) {
+		return in.hasNext("[a-zA-Z]");
+	}
+
+	private boolean charIsNumber(Scanner in) {
+		return in.hasNext("[0-9]");
 	}
 }

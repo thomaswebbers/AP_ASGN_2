@@ -31,7 +31,7 @@ public class Main {
 		Scanner statmentScanner = new Scanner (statement);
 		//while there are statements
 		//If(comment) skip line
-		//else if(printStatemnt) parsePrintStatement;
+		//else if(printStatement) parsePrintStatement;
 		//else if(assignment) do parseAssignment();
 		//else EXCEPTION
 	}
