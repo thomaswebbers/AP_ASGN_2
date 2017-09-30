@@ -122,29 +122,59 @@ public class Main {
 	}
 
 
-	void parseComplexFactor(String complexFactor){
-		//parseExpression()
-		//check if there is ')' at the end of expression else throw EXCEPTION
+	void parseComplexFactor(String complexFactor) throws  APException{
+		if(complexFactor.charAt(complexFactor.length() -1) == ')'){
+			String expression = complexFactor.substring(1, complexFactor.length() -1);
+			parseExpression(expression);
+		}else{
+			throw new APException(" Invalid complex factor, complex factor never closed");
+		}
+	}
+
+	//TODO return sets
+	void parseSet(String set) throws APException{
+		if(set.charAt(set.length() - 1) == '}'){
+			String rowOfNaturalNumbers = set.substring(1, set.length() -1);
+			if(rowOfNaturalNumbers.length() == 0){
+				//TODO return empty set
+				return;
+			}else{
+				Scanner setScanner = new Scanner(set);
+				setScanner.useDelimiter(",");
+				do {
+					if(nextCharIsNumber(setScanner)){
+						parseNaturalNumber(setScanner.next());
+					}else{
+						throw new APException("Invalid set: character in set is not a number");
+					}
+
+				}while(setScanner.hasNext());
+			}
+		}else{
+			throw new APException("Invalid set, set never closed");
+		}
+	}
+
+	//TODO return natural numbers
+	void parseNaturalNumber(String number){
+		Scanner numberScanner = new Scanner(number);
+		if(nextCharIsZero(numberScanner) && number.length() == 0){
+			return;
+		}else{
+			parsePositiveNumber(number);
+		}
 	}
 
 
-	void parseSet(String set){
-		//set is empty just return
-		//else
-		//check if first char is number and parseNaturalNumber if not throw EXCEPTION
-		//usedelimeter(',')
-		//while there are other natural numbers
-		//if first char is number parseNaturalNumber if not throw EXCEPTION
-	}
+	void parsePositiveNumber(String nonZeroNumber) throws  APException{
+		if(nonZeroNumber.charAt(0) == 0){
+			throw new APException("Invalid number in set, set contain non natural number");
+		}
+		Scanner positiveNumber = new Scanner(nonZeroNumber);
+		while(positiveNumber.hasNext()){
 
+		}
 
-	void parseNaturalNumber(){
-		//if charIsZero(char) and no chars after it return
-		//else parsePositiveNumber()
-	}
-
-
-	void parsePositiveNumber(){
 		//if charIsZero(char0) throw EXCEPTION
 		//while the number still has characters to be read
 		//if charIsNumber return else throw EXCEPTION
