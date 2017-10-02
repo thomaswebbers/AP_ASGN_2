@@ -42,68 +42,108 @@ public class Main {
 				throw new APException("Invalid statement found, please alter file\n");
 			}
 		}
-		//while there are statements
-		//If(comment) skip line
-		//else if(printStatement) parsePrintStatement;
-		//else if(assignment) do parseAssignment();
-		//else EXCEPTION
 	}
 
 
-	void parseAssigntment(String statement){
+	void parseAssigntment(String statement)throws  APException{
 		Scanner assignment = new Scanner(statement);
 		assignment.useDelimiter("=");
-		parseIdentifier(assignment.next());
-		parseExpression(assignment.next());
+		Identifier id = parseIdentifier(assignment.next());
+		SetInterface<BigInteger> value = parseExpression(assignment.next());
+		variables.put(id, value);
 	}
 	
-	//TODO Change return type
-	void  parsePrintStatement(String statement){
-		Identifier id = parseIdentifier(statement);
+
+	void parsePrintStatement(String statement) throws  APException{
 		statement = statement.substring(1);
 		SetInterface<BigInteger> result = parseExpression(statement);
-		variables.put(id, result);
-		out.println(statement);
-
-		//check if set is valid and then print it by creating a Set<BigInteger>
+		out.println(result.toString());
 	}
 
 
-	SetInterface<BigInteger> parseExpression(String expression){
-		Scanner termChain = new Scanner(expression);
+	SetInterface<BigInteger> parseExpression(String expressionString) throws  APException{
+		Scanner termChain = new Scanner(expressionString);
 		termChain.useDelimiter("\\+|\\-|\\|");
+		int numberOfParsedTerms = 0;
+		SetInterface<BigInteger> expression = null;
+		String operatorString = computeOperatorString(expressionString);
 		while(termChain.hasNext()){
-			parseTerm(termChain.next());
+			if(numberOfParsedTerms == 0){
+				expression = parseFactor(termChain.next());
+				numberOfParsedTerms++;
+			}else{
+				if(operatorString.charAt(0) == '+'){
+					SetInterface<BigInteger> termToUnion = parseFactor(termChain.next());
+					expression.union(termToUnion);
+					operatorString.substring(1);
+					numberOfParsedTerms++;
+				}else if(operatorString.charAt(0) == '-'){
+					SetInterface<BigInteger> termToComplement = parseFactor(termChain.next());
+					expression.complement(termToComplement);
+					operatorString.substring(1);
+					numberOfParsedTerms++;
+				}else if(operatorString.charAt(0) == '|'){
+					SetInterface<BigInteger> termToSymDifference = parseFactor(termChain.next());
+					expression.symDifference(termToSymDifference);
+					operatorString.substring(1);
+					numberOfParsedTerms++;
+				}
+			}
 		}
-
-		//TODO logic on terms
-		return null;
+		return expression;
 	}
 
 
-	void parseTerm(String term) {
-		Scanner factorChain = new Scanner(term);
+	private String computeOperatorString(String expressionString){
+		Scanner termsAndOperators = new Scanner(expressionString);
+		StringBuffer operatorStringBuffer = null;
+		while(termsAndOperators.hasNext()){
+			String operator = termsAndOperators.next();
+			if(operator == "+" || operator == "-" || operator == "|"){
+				operatorStringBuffer.append(operator);
+			}
+		}
+		return operatorStringBuffer.toString();
+	}
+
+
+	SetInterface<BigInteger> parseTerm(String termString) throws APException{
+		Scanner factorChain = new Scanner(termString);
 		factorChain.useDelimiter("\\*");
+		int numberOfParsedFactors = 0;
+		SetInterface<BigInteger> term = null;
 		while(factorChain.hasNext()){
-			parseFactor(factorChain.next());
+			if(numberOfParsedFactors == 0){
+				term = parseFactor(factorChain.next());
+				numberOfParsedFactors++;
+			}else{
+				SetInterface<BigInteger> factorToIntersect = parseFactor(factorChain.next());
+				term.intersection(factorToIntersect);
+				numberOfParsedFactors++;
+			}
 		}
-
-		//TODO logic on terms
-		return;
+		return term;
 	}
 
 
-	void parseFactor(String factor) throws APException{
+	SetInterface<BigInteger> parseFactor(String factor) throws APException{
 		Scanner factorScanner = new Scanner(factor);
+		SetInterface<BigInteger> set;
 		if(nextCharIsLetter(factorScanner)){
-			parseIdentifier(factorScanner.next());
+			Identifier id = parseIdentifier(factorScanner.next());
+			if (variables.containsKey(id)) {
+				set = variables.get(id);
+			}else{
+				throw new APException("Invalid set, set never initialized");
+			}
 		}else if(nextCharEqualsInput(factorScanner, '(')){
-			parseComplexFactor(factorScanner.next());
+			set = parseComplexFactor(factorScanner.next());
 		}else if(nextCharEqualsInput(factorScanner, '{')){
-			parseSet(factorScanner.next());
+			set = parseSet(factorScanner.next());
 		}else{
 			throw new APException("Invalid factor make sure all factors start with a letter, a \"(\" or a \"{\" \n");
 		}
+		return set;
 	}
 
 
@@ -122,62 +162,71 @@ public class Main {
 	}
 
 
-	void parseComplexFactor(String complexFactor) throws  APException{
-		if(complexFactor.charAt(complexFactor.length() -1) == ')'){
+	SetInterface<BigInteger> parseComplexFactor(String complexFactor) throws  APException{
+		SetInterface<BigInteger> set;
+		if(complexFactor.charAt(complexFactor.length() - 1) == ')'){
 			String expression = complexFactor.substring(1, complexFactor.length() -1);
-			parseExpression(expression);
+			set = parseExpression(expression);
+			return set;
 		}else{
 			throw new APException(" Invalid complex factor, complex factor never closed");
 		}
 	}
 
-	//TODO return sets
-	void parseSet(String set) throws APException{
+
+	SetInterface<BigInteger> parseSet(String set) throws APException{
+		SetInterface<BigInteger> parsedSet = new Set<>();
 		if(set.charAt(set.length() - 1) == '}'){
 			String rowOfNaturalNumbers = set.substring(1, set.length() -1);
+			//returns empty set
 			if(rowOfNaturalNumbers.length() == 0){
-				//TODO return empty set
-				return;
+				return parsedSet;
 			}else{
 				Scanner setScanner = new Scanner(set);
 				setScanner.useDelimiter(",");
+				//fills set and then returns it
 				do {
 					if(nextCharIsNumber(setScanner)){
-						parseNaturalNumber(setScanner.next());
+						BigInteger naturalNumber = parseNaturalNumber(setScanner.next());
+						parsedSet.add(naturalNumber);
 					}else{
 						throw new APException("Invalid set: character in set is not a number");
 					}
-
 				}while(setScanner.hasNext());
+				return parsedSet;
 			}
 		}else{
 			throw new APException("Invalid set, set never closed");
 		}
 	}
 
-	//TODO return natural numbers
-	void parseNaturalNumber(String number){
+
+	BigInteger parseNaturalNumber(String number) throws  APException{
 		Scanner numberScanner = new Scanner(number);
-		if(nextCharIsZero(numberScanner) && number.length() == 0){
-			return;
+		BigInteger naturalNumber;
+		if(nextCharIsZero(numberScanner) && number.length() == 1){
+			naturalNumber = BigInteger.ZERO;
 		}else{
-			parsePositiveNumber(number);
+			naturalNumber = parsePositiveNumber(number);
 		}
+
+		return naturalNumber;
 	}
 
 
-	void parsePositiveNumber(String nonZeroNumber) throws  APException{
+	BigInteger parsePositiveNumber(String nonZeroNumber) throws  APException{
 		if(nonZeroNumber.charAt(0) == 0){
-			throw new APException("Invalid number in set, set contain non natural number");
+			throw new APException("Invalid number in set, set contains non number starting with 0");
 		}
-		Scanner positiveNumber = new Scanner(nonZeroNumber);
-		while(positiveNumber.hasNext()){
-
+		Scanner positiveNumberScanner = new Scanner(nonZeroNumber);
+		while(positiveNumberScanner.hasNext()){
+			if(!nextCharIsNumber(positiveNumberScanner)){
+				throw new APException("Invalid number in set, set contains non number element");
+			}
 		}
 
-		//if charIsZero(char0) throw EXCEPTION
-		//while the number still has characters to be read
-		//if charIsNumber return else throw EXCEPTION
+		BigInteger positiveNumber = new BigInteger(nonZeroNumber);
+		return positiveNumber;
 	}
 
 
