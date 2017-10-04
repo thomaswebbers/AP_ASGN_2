@@ -11,7 +11,7 @@ public class Main {
 	*
 	* 						!!!!!IMPORTANT!!!!
 	*
-	* 	Before implementing anything read the boolean methods like charIsLetter()
+	* 	Before implementing anything read the boolean methods like nextCharIsLetter()
 	*	Using these will make the  implementation much cleaner ;)
 	*
 	*
@@ -28,12 +28,12 @@ public class Main {
 
 	void parseStatement(String statement) throws APException {
 		statement = statement.replaceAll(" ","");
-		if(charEqualsInput(statement.charAt(0), '/')){
+		if(nextCharEqualsInput(statement.charAt(0), '/')){
 			//skip line because its a comment
 		}
-		else if(charEqualsInput(statement.charAt(0), '?')){
+		else if(nextCharEqualsInput(statement.charAt(0), '?')){
 			parsePrintStatement(statement);
-		}else if(charIsLetter(statement.charAt(0))){
+		}else if(nextCharIsLetter(statement.charAt(0))){
 			parseAssigntment(statement);
 		}else{
 			System.out.printf("The input is: %s\n", statement);
@@ -44,6 +44,7 @@ public class Main {
 
 	void parseAssigntment(String statement)throws  APException{
 		Scanner assignment = new Scanner(statement);
+		assignment.nextCharIs();
 		assignment.useDelimiter("=");
 		Identifier id = parseIdentifier(assignment.next());
 		SetInterface<BigInteger> value = parseExpression(assignment.next());
@@ -129,16 +130,16 @@ public class Main {
 		}
 		Scanner factorScanner = new Scanner(factor);
 		SetInterface<BigInteger> set;
-		if(charIsLetter(factor.charAt(0))){
+		if(nextCharIsLetter(factor.charAt(0))){
 			Identifier id = parseIdentifier(factorScanner.next());
 			if (variables.containsKey(id)) {
 				set = variables.get(id);
 			}else{
 				throw new APException("Invalid set, set never initialized\n");
 			}
-		}else if(charEqualsInput(factor.charAt(0), '(')){
+		}else if(nextCharEqualsInput(factor.charAt(0), '(')){
 			set = parseComplexFactor(factorScanner.next());
-		}else if(charEqualsInput(factor.charAt(0), '{')){
+		}else if(nextCharEqualsInput(factor.charAt(0), '{')){
 			set = parseSet(factorScanner.next());
 		}else{
 			throw new APException("Invalid factor make sure all factors start with a \"letter\", a \"(\" or a \"{\" \n");
@@ -202,7 +203,7 @@ public class Main {
 
 	BigInteger parseNaturalNumber(String number) throws  APException{
 		BigInteger naturalNumber;
-		if(charIsZero(number.charAt(0)) && number.length() == 1){
+		if(nextCharIsZero(number.charAt(0)) && number.length() == 1){
 			naturalNumber = BigInteger.ZERO;
 		}else{
 			naturalNumber = parsePositiveNumber(number);
@@ -218,7 +219,7 @@ public class Main {
 		}
 		//Scanner positiveNumberScanner = new Scanner(nonZeroNumber);
 		for(int i = 1; i < nonZeroNumber.length(); i++){
-			if(!charIsNumber(nonZeroNumber.charAt(i))){
+			if(!nextCharIsNumber(nonZeroNumber.charAt(i))){
 				throw new APException("Invalid number in set, set contains non number element\n");
 			}
 		}
@@ -231,45 +232,46 @@ public class Main {
 	}
 
 
-	private boolean charIsNonZeroNumber(char character) {
-		String characterString = String.valueOf(character);
-		return characterString.matches("[1-9]");
+
+	private boolean nextCharIsNonZeroNumber(Scanner in) {
+		in.useDelimiter("");
+		return in.hasNext("[1-9]");
 	}
 
 
-	private boolean charIsNumber(char character) {
-		String characterString = String.valueOf(character);
-		return characterString.matches("[0-9]");
+	private boolean nextCharIsNumber(Scanner in) {
+		in.useDelimiter("");
+		return in.hasNext("[0-9]");
 	}
 
 
-	private boolean charIsZero(char character) {
-		String characterString = String.valueOf(character);
-		return characterString.matches("[0]");
+	private boolean nextCharIsZero(Scanner in) {
+		in.useDelimiter("");
+		return in.hasNext("0");
 	}
 
 
-	private boolean charIsLetter(char character) {
-		String characterString = String.valueOf(character);
-		return characterString.matches("[a-zA-Z]");
+	private boolean nextCharIsLetter(Scanner in) {
+		in.useDelimiter("");
+		return in.hasNext("[a-zA-Z]");
 	}
 
 
-	private boolean charEqualsInput(char character, char comparedChar) {
-		//System.out.println((character == comparedChar) + " BOOLEAN " + comparedChar + " HO ");
-		return character == comparedChar;
+	private boolean nextCharEqualsInput(Scanner in, char c) {
+		in.useDelimiter("");
+		return in.hasNext(Pattern.quote(c + ""));
 	}
 
 
-	private boolean charIsAdditiveOperator(char character) {
-		String characterString = String.valueOf(character);
-		return  characterString.matches("\\+ | \\- | \\|");
+	private boolean charIsAdditiveOperator(Scanner in) {
+		in.useDelimiter("");
+		return  in.hasNext("\\+ | \\- | \\|");
 	}
 
 
-	private boolean charIsMultiplicativeOperator(char character) {
-		String characterString = String.valueOf(character);
-		return characterString.matches("\\*");
+	private boolean charIsMultiplicativeOperator(Scanner in) {
+		in.useDelimiter("");
+		return  in.hasNext("\\*");
 	}
 
     private void start() {
