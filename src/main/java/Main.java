@@ -1,10 +1,8 @@
-import java.io.File;
 import java.io.PrintStream;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import java.util.InputMismatchException;
 
 public class Main {
 	/*
@@ -28,19 +26,18 @@ public class Main {
 	}
 
 
-	void parseStatement(String input) throws APException {
-		Scanner statmentScanner = new Scanner (input);
-		while(statmentScanner.hasNextLine()){
-			String statement = statmentScanner.nextLine();
-			if(nextCharEqualsInput(statmentScanner, '\\')){
-				//skip line because its a comment
-			}else if(nextCharEqualsInput(statmentScanner, '?')){
-				parsePrintStatement(statement);
-			}else if(nextCharIsLetter(statmentScanner)){
-				parseAssigntment(statement);
-			}else{
-				throw new APException("Invalid statement found, please alter file\n");
-			}
+	void parseStatement(String statement) throws APException {
+		statement = statement.replaceAll(" ","");
+		if(charEqualsInput(statement.charAt(0), '/')){
+			//skip line because its a comment
+		}
+		else if(charEqualsInput(statement.charAt(0), '?')){
+			parsePrintStatement(statement);
+		}else if(charIsLetter(statement.charAt(0))){
+			parseAssigntment(statement);
+		}else{
+			System.out.printf("The input is: %s\n", statement);
+			//throw new APException("Invalid statement found, please alter file\n");
 		}
 	}
 
@@ -96,7 +93,7 @@ public class Main {
 
 	private String computeOperatorString(String expressionString){
 		Scanner termsAndOperators = new Scanner(expressionString);
-		StringBuffer operatorStringBuffer = null;
+		StringBuffer operatorStringBuffer =  new StringBuffer();
 		while(termsAndOperators.hasNext()){
 			String operator = termsAndOperators.next();
 			if(operator == "+" || operator == "-" || operator == "|"){
@@ -127,21 +124,24 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseFactor(String factor) throws APException{
+		if(factor.charAt(0) == ' '){
+			factor = factor.substring(1);
+		}
 		Scanner factorScanner = new Scanner(factor);
 		SetInterface<BigInteger> set;
-		if(nextCharIsLetter(factorScanner)){
+		if(charIsLetter(factor.charAt(0))){
 			Identifier id = parseIdentifier(factorScanner.next());
 			if (variables.containsKey(id)) {
 				set = variables.get(id);
 			}else{
-				throw new APException("Invalid set, set never initialized");
+				throw new APException("Invalid set, set never initialized\n");
 			}
-		}else if(nextCharEqualsInput(factorScanner, '(')){
+		}else if(charEqualsInput(factor.charAt(0), '(')){
 			set = parseComplexFactor(factorScanner.next());
-		}else if(nextCharEqualsInput(factorScanner, '{')){
+		}else if(charEqualsInput(factor.charAt(0), '{')){
 			set = parseSet(factorScanner.next());
 		}else{
-			throw new APException("Invalid factor make sure all factors start with a letter, a \"(\" or a \"{\" \n");
+			throw new APException("Invalid factor make sure all factors start with a \"letter\", a \"(\" or a \"{\" \n");
 		}
 		return set;
 	}
@@ -152,9 +152,10 @@ public class Main {
 		Scanner identifierScanner = new Scanner(statement);
 		while(identifierScanner.hasNext()){
 			String character = identifierScanner.next();
-			boolean validChar = identifier.readValidChar(identifierScanner.next());
+
+			boolean validChar = identifier.readValidChar(character);
 			if (!validChar){
-				throw new APException("Invalid Identifier, Identifiers should start with a letter and only contain letters and numbers");
+				throw new APException("Invalid Identifier, Identifiers should start with a letter and only contain letters and numbers\n");
 			}
 			identifier.addChar(character);
 		}
@@ -169,7 +170,7 @@ public class Main {
 			set = parseExpression(expression);
 			return set;
 		}else{
-			throw new APException(" Invalid complex factor, complex factor never closed");
+			throw new APException(" Invalid complex factor, complex factor never closed\n");
 		}
 	}
 
@@ -177,34 +178,31 @@ public class Main {
 	SetInterface<BigInteger> parseSet(String set) throws APException{
 		SetInterface<BigInteger> parsedSet = new Set<>();
 		if(set.charAt(set.length() - 1) == '}'){
+			//TODO the { should be removed here but oddly it is not....
 			String rowOfNaturalNumbers = set.substring(1, set.length() -1);
+			//String rowOfNaturalNumbers = set;
 			//returns empty set
 			if(rowOfNaturalNumbers.length() == 0){
 				return parsedSet;
 			}else{
-				Scanner setScanner = new Scanner(set);
+				Scanner setScanner = new Scanner(rowOfNaturalNumbers);
 				setScanner.useDelimiter(",");
 				//fills set and then returns it
 				do {
-					if(nextCharIsNumber(setScanner)){
-						BigInteger naturalNumber = parseNaturalNumber(setScanner.next());
-						parsedSet.add(naturalNumber);
-					}else{
-						throw new APException("Invalid set: character in set is not a number");
-					}
+					BigInteger naturalNumber = parseNaturalNumber(setScanner.next());
+					parsedSet.add(naturalNumber);
 				}while(setScanner.hasNext());
 				return parsedSet;
 			}
 		}else{
-			throw new APException("Invalid set, set never closed");
+			throw new APException("Invalid set, set never closed\n");
 		}
 	}
 
 
 	BigInteger parseNaturalNumber(String number) throws  APException{
-		Scanner numberScanner = new Scanner(number);
 		BigInteger naturalNumber;
-		if(nextCharIsZero(numberScanner) && number.length() == 1){
+		if(charIsZero(number.charAt(0)) && number.length() == 1){
 			naturalNumber = BigInteger.ZERO;
 		}else{
 			naturalNumber = parsePositiveNumber(number);
@@ -216,13 +214,16 @@ public class Main {
 
 	BigInteger parsePositiveNumber(String nonZeroNumber) throws  APException{
 		if(nonZeroNumber.charAt(0) == 0){
-			throw new APException("Invalid number in set, set contains non number starting with 0");
+			throw new APException("Invalid number in set, set contains non number starting with 0\n");
 		}
-		Scanner positiveNumberScanner = new Scanner(nonZeroNumber);
-		while(positiveNumberScanner.hasNext()){
-			if(!nextCharIsNumber(positiveNumberScanner)){
-				throw new APException("Invalid number in set, set contains non number element");
+		//Scanner positiveNumberScanner = new Scanner(nonZeroNumber);
+		for(int i = 1; i < nonZeroNumber.length(); i++){
+			if(!charIsNumber(nonZeroNumber.charAt(i))){
+				throw new APException("Invalid number in set, set contains non number element\n");
 			}
+		}
+		if(true){
+			//throw new APException(nonZeroNumber + " NONZERONUMBER ");
 		}
 
 		BigInteger positiveNumber = new BigInteger(nonZeroNumber);
@@ -230,29 +231,46 @@ public class Main {
 	}
 
 
-	private boolean nextCharIsNonZeroNumber(Scanner in) { return in.hasNext("[1-9]"); }
-
-
-	private boolean nextCharIsNumber(Scanner in) {
- 		return in.hasNext("[0-9]");
+	private boolean charIsNonZeroNumber(char character) {
+		String characterString = String.valueOf(character);
+		return characterString.matches("[1-9]");
 	}
 
 
-	private boolean nextCharIsZero(Scanner in) { return in.hasNext("0");}
-
-
-	private boolean nextCharIsLetter(Scanner in) {
- 		return in.hasNext("[a-zA-Z]");
+	private boolean charIsNumber(char character) {
+		String characterString = String.valueOf(character);
+		return characterString.matches("[0-9]");
 	}
 
 
-	private boolean nextCharEqualsInput(Scanner in, char c) { return in.hasNext(Pattern.quote(c + "")); }
+	private boolean charIsZero(char character) {
+		String characterString = String.valueOf(character);
+		return characterString.matches("[0]");
+	}
 
 
-	private boolean nextCharIsAdditiveOperator(Scanner in) { return  in.hasNext("\\+ | \\- | \\|"); }
+	private boolean charIsLetter(char character) {
+		String characterString = String.valueOf(character);
+		return characterString.matches("[a-zA-Z]");
+	}
 
 
-	private boolean nextCharIsMultiplicativeOperator(Scanner in) { return  in.hasNext("\\*"); }
+	private boolean charEqualsInput(char character, char comparedChar) {
+		//System.out.println((character == comparedChar) + " BOOLEAN " + comparedChar + " HO ");
+		return character == comparedChar;
+	}
+
+
+	private boolean charIsAdditiveOperator(char character) {
+		String characterString = String.valueOf(character);
+		return  characterString.matches("\\+ | \\- | \\|");
+	}
+
+
+	private boolean charIsMultiplicativeOperator(char character) {
+		String characterString = String.valueOf(character);
+		return characterString.matches("\\*");
+	}
 
     private void start() {
         Scanner in = new Scanner(System.in);

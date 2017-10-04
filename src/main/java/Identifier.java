@@ -25,16 +25,15 @@ class Identifier implements  IdentifierInterface {
 
 	@Override
 	public boolean readValidChar(String readCharacter) {
-		Scanner character = new Scanner(readCharacter);
 		if(identifier.length() == 0){
-			if(charIsLetter(character)){
-				addChar(character.next());
+			if(charIsLetter(readCharacter.charAt(0))){
+				addChar(readCharacter);
 			}else{
 				return false;
 			}
 		}else {
-			if(charIsNumber(character) || charIsLetter(character)){
-				addChar(character.next());
+			if(charIsNumber(readCharacter.charAt(0)) || charIsLetter(readCharacter.charAt(0))){
+				addChar(readCharacter);
 			}else{
 				return false;
 			}
@@ -53,11 +52,13 @@ class Identifier implements  IdentifierInterface {
 		return identifier.toString();
 	}
 
-	private boolean charIsLetter(Scanner in) {
-		return in.hasNext("[a-zA-Z]");
+	private boolean charIsLetter(char character) {
+		String characterString = String.valueOf(character);
+		return characterString.matches("[a-zA-Z]");
 	}
 
-	private boolean charIsNumber(Scanner in) {
-		return in.hasNext("[0-9]");
+	private boolean charIsNumber(char character) {
+		String characterString = String.valueOf(character);
+		return characterString.matches("[0-9]");
 	}
 }
