@@ -27,13 +27,16 @@ public class Main {
 
 
 	void parseStatement(String statement) throws APException {
+		//Removes all the spaces
 		statement = statement.replaceAll(" ","");
-		if(nextCharEqualsInput(statement.charAt(0), '/')){
+		Scanner statementScanner = new Scanner(statement);
+		if(nextCharEqualsInput(statementScanner, '/')){
 			//skip line because its a comment
 		}
-		else if(nextCharEqualsInput(statement.charAt(0), '?')){
+		else if(nextCharEqualsInput(statementScanner, '?')){
+
 			parsePrintStatement(statement);
-		}else if(nextCharIsLetter(statement.charAt(0))){
+		}else if(nextCharIsLetter(statementScanner)){
 			parseAssigntment(statement);
 		}else{
 			System.out.printf("The input is: %s\n", statement);
@@ -44,7 +47,6 @@ public class Main {
 
 	void parseAssigntment(String statement)throws  APException{
 		Scanner assignment = new Scanner(statement);
-		assignment.nextCharIs();
 		assignment.useDelimiter("=");
 		Identifier id = parseIdentifier(assignment.next());
 		SetInterface<BigInteger> value = parseExpression(assignment.next());
@@ -58,7 +60,7 @@ public class Main {
 		out.println(result.toString());
 	}
 
-
+	//TODO APEXCEPTION
 	SetInterface<BigInteger> parseExpression(String expressionString) throws  APException{
 		Scanner termChain = new Scanner(expressionString);
 		termChain.useDelimiter("\\+|\\-|\\|");
@@ -130,16 +132,16 @@ public class Main {
 		}
 		Scanner factorScanner = new Scanner(factor);
 		SetInterface<BigInteger> set;
-		if(nextCharIsLetter(factor.charAt(0))){
+		if(nextCharIsLetter(factorScanner)){
 			Identifier id = parseIdentifier(factorScanner.next());
 			if (variables.containsKey(id)) {
 				set = variables.get(id);
 			}else{
 				throw new APException("Invalid set, set never initialized\n");
 			}
-		}else if(nextCharEqualsInput(factor.charAt(0), '(')){
+		}else if(nextCharEqualsInput(factorScanner, '(')){
 			set = parseComplexFactor(factorScanner.next());
-		}else if(nextCharEqualsInput(factor.charAt(0), '{')){
+		}else if(nextCharEqualsInput(factorScanner, '{')){
 			set = parseSet(factorScanner.next());
 		}else{
 			throw new APException("Invalid factor make sure all factors start with a \"letter\", a \"(\" or a \"{\" \n");
@@ -153,7 +155,6 @@ public class Main {
 		Scanner identifierScanner = new Scanner(statement);
 		while(identifierScanner.hasNext()){
 			String character = identifierScanner.next();
-
 			boolean validChar = identifier.readValidChar(character);
 			if (!validChar){
 				throw new APException("Invalid Identifier, Identifiers should start with a letter and only contain letters and numbers\n");
@@ -203,7 +204,8 @@ public class Main {
 
 	BigInteger parseNaturalNumber(String number) throws  APException{
 		BigInteger naturalNumber;
-		if(nextCharIsZero(number.charAt(0)) && number.length() == 1){
+		Scanner numberScanner = new Scanner(number);
+		if(nextCharIsZero(numberScanner) && number.length() == 1){
 			naturalNumber = BigInteger.ZERO;
 		}else{
 			naturalNumber = parsePositiveNumber(number);
@@ -217,16 +219,14 @@ public class Main {
 		if(nonZeroNumber.charAt(0) == 0){
 			throw new APException("Invalid number in set, set contains non number starting with 0\n");
 		}
-		//Scanner positiveNumberScanner = new Scanner(nonZeroNumber);
+
+		Scanner positiveNumberScanner = new Scanner(nonZeroNumber);
 		for(int i = 1; i < nonZeroNumber.length(); i++){
-			if(!nextCharIsNumber(nonZeroNumber.charAt(i))){
+			if(!nextCharIsNumber(positiveNumberScanner)){
 				throw new APException("Invalid number in set, set contains non number element\n");
 			}
+			positiveNumberScanner.next();
 		}
-		if(true){
-			//throw new APException(nonZeroNumber + " NONZERONUMBER ");
-		}
-
 		BigInteger positiveNumber = new BigInteger(nonZeroNumber);
 		return positiveNumber;
 	}

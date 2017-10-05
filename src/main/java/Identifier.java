@@ -9,7 +9,7 @@ class Identifier implements  IdentifierInterface {
 
 	@Override
 	public int hashCode() {
-		return identifier.hashCode();
+		return identifier.toString().hashCode();
 	}
 	
 	@Override
