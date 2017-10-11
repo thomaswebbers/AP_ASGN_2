@@ -12,12 +12,17 @@ public class Set <E extends Comparable> implements SetInterface<E> {
         init();
 	}
 
+
     public SetInterface<E> union(SetInterface<E> set) {
+        System.out.println(this.toString() + " SET A");
+        System.out.println(set.toString() + " SET B");
+
         if (set.isEmpty()) {
             return this.copy();
         }
 
         SetInterface<E> result = set.copy();
+        System.out.println(result.toString() + " COPY");
 
         if(this.isEmpty()) {
             return result;
@@ -25,12 +30,17 @@ public class Set <E extends Comparable> implements SetInterface<E> {
 
         this.list.goToFirst();
 
+        //System.out.println(this.list.retrieve() + "ELEMENT");
         do {
+            System.out.println(this.list.retrieve() + "RETRIEVED");
         	result.add(this.list.retrieve());
+            //this.list.goToNext();
         } while (this.list.goToNext() == true);
 
+        System.out.println(result.toString() + "RESULT");
         return result;
     }
+
 
     public SetInterface<E> intersection(SetInterface<E> set){
         SetInterface<E> result = new Set<E>();
@@ -52,6 +62,7 @@ public class Set <E extends Comparable> implements SetInterface<E> {
         return result;
     }
 
+
     public SetInterface<E> complement(SetInterface<E> set) {
         SetInterface<E> result = this.copy();
 
@@ -72,12 +83,14 @@ public class Set <E extends Comparable> implements SetInterface<E> {
         return result;
     }
 
+
     public SetInterface<E> symDifference(SetInterface<E> set) {
         SetInterface<E> a = this.union(set);
         SetInterface<E> b = set.intersection(this);
 
         return a.complement(b);
     }
+
 
     public SetInterface<E> remove(E e){
     	if (this.list.find(e)) {
@@ -86,30 +99,36 @@ public class Set <E extends Comparable> implements SetInterface<E> {
     	return this;
     }
 
+
     public boolean contains(E e){
     	return this.list.find(e);
     }
+
 
     public void init(){
         this.list.init();
     }
 
+
     public SetInterface<E> add(E e) {
     	if (!this.list.find(e)) {
-    	    System.out.println("adding: " + e.toString());
+    	    //System.out.println("adding: " + e.toString());
     		this.list.insert(e);
-    		System.out.println("current list: " + this.toString() + "\n");
+    		//System.out.println("current list: " + this.toString() + "\n");
     	}
         return this;
     }
+
 
     public int size() {
         return this.list.size();
     }
 
+
     public boolean isEmpty() {
         return this.list.isEmpty();
     }
+
 
     public SetInterface<E>copy() {
         Set<E> copySet = new Set<E>();
@@ -117,6 +136,7 @@ public class Set <E extends Comparable> implements SetInterface<E> {
         return copySet;
     }
 
+    @Override
     public String toString() {
         if(this.isEmpty()){
             return "";

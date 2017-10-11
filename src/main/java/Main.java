@@ -34,7 +34,6 @@ public class Main {
 			//skip line because its a comment
 		}
 		else if(nextCharEqualsInput(statementScanner, '?')){
-
 			parsePrintStatement(statement);
 		}else if(nextCharIsLetter(statementScanner)){
 			parseAssigntment(statement);
@@ -67,24 +66,26 @@ public class Main {
 		int numberOfParsedTerms = 0;
 		SetInterface<BigInteger> expression = null;
 		String operatorString = computeOperatorString(expressionString);
+		//System.out.println("Operatorstring contains?" + operatorString);
 		while(termChain.hasNext()){
 			if(numberOfParsedTerms == 0){
-				expression = parseFactor(termChain.next());
+				expression = parseTerm(termChain.next());
 				numberOfParsedTerms++;
 			}else{
 				if(operatorString.charAt(0) == '+'){
-					SetInterface<BigInteger> termToUnion = parseFactor(termChain.next());
-					expression.union(termToUnion);
+					SetInterface<BigInteger> termToUnion = parseTerm(termChain.next());
+					expression = expression.union(termToUnion);
+					System.out.println(expression.toString() + " expression");
 					operatorString.substring(1);
 					numberOfParsedTerms++;
 				}else if(operatorString.charAt(0) == '-'){
-					SetInterface<BigInteger> termToComplement = parseFactor(termChain.next());
-					expression.complement(termToComplement);
+					SetInterface<BigInteger> termToComplement = parseTerm(termChain.next());
+					expression = expression.complement(termToComplement);
 					operatorString.substring(1);
 					numberOfParsedTerms++;
 				}else if(operatorString.charAt(0) == '|'){
-					SetInterface<BigInteger> termToSymDifference = parseFactor(termChain.next());
-					expression.symDifference(termToSymDifference);
+					SetInterface<BigInteger> termToSymDifference = parseTerm(termChain.next());
+					expression = expression.symDifference(termToSymDifference);
 					operatorString.substring(1);
 					numberOfParsedTerms++;
 				}
@@ -95,11 +96,15 @@ public class Main {
 
 
 	private String computeOperatorString(String expressionString){
+		//System.out.println(expressionString + " EXPRESSION");
 		Scanner termsAndOperators = new Scanner(expressionString);
 		StringBuffer operatorStringBuffer =  new StringBuffer();
+		termsAndOperators.useDelimiter("");
 		while(termsAndOperators.hasNext()){
 			String operator = termsAndOperators.next();
-			if(operator == "+" || operator == "-" || operator == "|"){
+			//System.out.println(operator + " OPERATOR");
+			//System.out.println(operator.equals("+") + "BOOL");
+			if(operator.equals("+") || operator.equals("-") || operator.equals("|")){
 				operatorStringBuffer.append(operator);
 			}
 		}
@@ -127,13 +132,12 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseFactor(String factor) throws APException{
-		if(factor.charAt(0) == ' '){
-			factor = factor.substring(1);
-		}
+		//System.out.println(factor + "FACTOR");
 		Scanner factorScanner = new Scanner(factor);
 		SetInterface<BigInteger> set;
 		if(nextCharIsLetter(factorScanner)){
-			Identifier id = parseIdentifier(factorScanner.next());
+			Identifier id = parseIdentifier(factor);
+			//System.out.println("boolean" + variables.containsKey(id));
 			if (variables.containsKey(id)) {
 				set = variables.get(id);
 			}else{
@@ -142,7 +146,7 @@ public class Main {
 		}else if(nextCharEqualsInput(factorScanner, '(')){
 			set = parseComplexFactor(factorScanner.next());
 		}else if(nextCharEqualsInput(factorScanner, '{')){
-			set = parseSet(factorScanner.next());
+			set = parseSet(factor);
 		}else{
 			throw new APException("Invalid factor make sure all factors start with a \"letter\", a \"(\" or a \"{\" \n");
 		}
@@ -153,13 +157,14 @@ public class Main {
 	Identifier parseIdentifier(String statement) throws  APException{
 		Identifier identifier = new Identifier();
 		Scanner identifierScanner = new Scanner(statement);
+		identifierScanner.useDelimiter("");
 		while(identifierScanner.hasNext()){
 			String character = identifierScanner.next();
+			//System.out.println(character + "CHARACTER");
 			boolean validChar = identifier.readValidChar(character);
 			if (!validChar){
 				throw new APException("Invalid Identifier, Identifiers should start with a letter and only contain letters and numbers\n");
 			}
-			identifier.addChar(character);
 		}
 		return identifier;
 	}
@@ -178,9 +183,9 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseSet(String set) throws APException{
+		//System.out.println(set + " SET");
 		SetInterface<BigInteger> parsedSet = new Set<>();
 		if(set.charAt(set.length() - 1) == '}'){
-			//TODO the { should be removed here but oddly it is not....
 			String rowOfNaturalNumbers = set.substring(1, set.length() -1);
 			//String rowOfNaturalNumbers = set;
 			//returns empty set
@@ -197,6 +202,7 @@ public class Main {
 				return parsedSet;
 			}
 		}else{
+			System.out.println(set);
 			throw new APException("Invalid set, set never closed\n");
 		}
 	}
