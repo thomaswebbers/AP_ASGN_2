@@ -14,15 +14,12 @@ public class Set <E extends Comparable> implements SetInterface<E> {
 
 
     public SetInterface<E> union(SetInterface<E> set) {
-        System.out.println(this.toString() + " SET A");
-        System.out.println(set.toString() + " SET B");
 
         if (set.isEmpty()) {
             return this.copy();
         }
 
         SetInterface<E> result = set.copy();
-        System.out.println(result.toString() + " COPY");
 
         if(this.isEmpty()) {
             return result;
@@ -30,14 +27,11 @@ public class Set <E extends Comparable> implements SetInterface<E> {
 
         this.list.goToFirst();
 
-        //System.out.println(this.list.retrieve() + "ELEMENT");
         do {
-            System.out.println(this.list.retrieve() + "RETRIEVED");
         	result.add(this.list.retrieve());
-            //this.list.goToNext();
+
         } while (this.list.goToNext() == true);
 
-        System.out.println(result.toString() + "RESULT");
         return result;
     }
 
