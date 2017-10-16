@@ -37,8 +37,8 @@ public class Main {
 		} else if (nextCharIsLetter(statementScanner)) {
 			parseAssigntment(statement);
 		} else {
-			System.out.printf("The input is: %s\n", statement);
-			//throw new APException("Invalid statement found, please alter file\n");
+			//System.out.printf("The input is: %s\n", statement);
+			throw new APException("Invalid statement found, please alter file\n");
 		}
 	}
 
@@ -98,48 +98,74 @@ public class Main {
 
 	//TODO APEXCEPTION
 	SetInterface<BigInteger> parseExpression(String expressionString) throws APException {
+		//System.out.printf(expressionString + " EXPRESSION\n");
 		int numberOfParsedTerms = 0;
 		SetInterface<BigInteger> expression = null;
 		String operatorString = computeOperatorString(expressionString);
 		String found = null;
 		int count = 0;
 		while(expressionString.length() > 0) {
+			//System.out.printf(expressionString + " EXPRESSION IS NOW\n");
 			if (expressionString.charAt(0) == '(') {
+				//System.out.println(" PARENTHESIS BRANCH");
 				for (int i = 0; i < expressionString.length(); i++) {
+					//System.out.println(count + " COUNT\n");
 					if (expressionString.charAt(i) == '(') {
 						count++;
 					} else if (expressionString.charAt(i) == ')') {
 						count--;
+					}else if(i == expressionString.length()-1){
+						System.out.println("THIS");
+						found = expressionString;
+						parseTerm(found);
+						break;
 					}
 					if (count == 0) {
-						found = expressionString.substring(0, i-1);
-						expressionString = expressionString.substring(i);
+						//System.out.println("THAT");
+						found = expressionString.substring(0, i+1);
+						//System.out.println(found  + " WHAT ARE YOU???\n");
+						expressionString = expressionString.substring(i+1);
+						//System.out.println(expressionString + " leftover string\n");
 						break;
 					}
 				}
 			} else {
+				//System.out.println("BRANCH");
 				for (int i = 0; i < expressionString.length(); i++) {
 					if (expressionString.charAt(i) == '+' || expressionString.charAt(i) == '-' || expressionString.charAt(i) == '|') {
-						found = expressionString.substring(0, i-1);
+						//Could also be i-1 testing required
+						found = expressionString.substring(0, i);
+						//System.out.println(found + " FOUNDFIRST\n");
 						expressionString = expressionString.substring(i);
+						//System.out.println(expressionString + " Expression has these things");
 						break;
+					}
+					if(i == expressionString.length()-1){
+						found = expressionString;
+						//System.out.println(found + " FOUNDSECOND\n");
+						expressionString = "";
 					}
 				}
 			}
 
+			//System.out.println("expression should not contain operators: " + expressionString);
 
+			//TODO seperate in two methods from this point
+			if(expressionString.length() > 0) {
+				expressionString = expressionString.substring(1);
+			}
+
+			System.out.println(found + " FOUND\n");
+			//System.out.println(numberOfParsedTerms + "PARSED");
 			if (numberOfParsedTerms == 0) {
 				expression = parseTerm(found);
+				System.out.println("expression contains: " + expression.toString());
 				numberOfParsedTerms++;
 			} else {
-				//TODO seperate in two methods from this point
-				if(expressionString.length() > 0) {
-					expressionString = expressionString.substring(1);
-				}
 				if (operatorString.charAt(0) == '+') {
 					SetInterface<BigInteger> termToUnion = parseTerm(found);
 					expression = expression.union(termToUnion);
-					System.out.println(expression.toString() + " expression");
+					//System.out.println(expression.toString() + " expression");
 					operatorString.substring(1);
 					numberOfParsedTerms++;
 				} else if (operatorString.charAt(0) == '-') {
@@ -194,7 +220,7 @@ public class Main {
 
 
 
-
+/*
 	SetInterface<BigInteger> singleTerm(String term, int numberOfParsedTerms, SetInterface<BigInteger> expression, char operator) throws APException{
 		//String operatorString = computeOperatorString(term);
 			if(numberOfParsedTerms == 0){
@@ -218,7 +244,7 @@ public class Main {
 			}
 		return expression;
 	}
-
+*/
 
 	private String computeOperatorString(String expressionString){
 		Scanner termsAndOperators = new Scanner(expressionString);
@@ -235,7 +261,7 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseTerm(String termString) throws APException{
-		System.out.println(termString + " TermString");
+		//System.out.println(termString + " TermString");
 		Scanner factorChain = new Scanner(termString);
 		factorChain.useDelimiter("\\*");
 		int numberOfParsedFactors = 0;
@@ -255,7 +281,7 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseFactor(String factor) throws APException{
-		System.out.println(factor + "FACTOR");
+		//System.out.println(factor + "FACTOR");
 		Scanner factorScanner = new Scanner(factor);
 		SetInterface<BigInteger> set;
 		if(nextCharIsLetter(factorScanner)){
@@ -295,7 +321,7 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseComplexFactor(String complexFactor) throws  APException{
-		System.out.println(complexFactor + " COMPLEX");
+		//System.out.println(complexFactor + " COMPLEX");
 		SetInterface<BigInteger> set;
 		if(complexFactor.charAt(complexFactor.length() - 1) == ')'){
 			String expression = complexFactor.substring(1, complexFactor.length() -1);
