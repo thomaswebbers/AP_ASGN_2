@@ -16,9 +16,6 @@ class Identifier implements  IdentifierInterface {
 	public boolean equals(Object obj) {
 		if (obj instanceof Identifier) {
 			Identifier that = (Identifier) obj;
-			//System.out.println(that.identifier + " THAT");
-			//System.out.println(this.identifier + " THIS");
-			//System.out.println(this.identifier.toString().equals(that.identifier.toString()) + " BOOLEAN");
 			return this.identifier.toString().equals(that.identifier.toString());
 		}
 		else {
