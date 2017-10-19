@@ -28,8 +28,6 @@ public class Main {
 
 	void parseStatement(String statement) throws APException {
 		//Removes all the spaces
-		//System.out.println();
-		//System.out.println("START OF STATEMENT--------------------------------------------------------------");
 		statement = statement.replaceAll(" ", "");
 		Scanner statementScanner = new Scanner(statement);
 		if (nextCharEqualsInput(statementScanner, '/')) {
@@ -39,7 +37,6 @@ public class Main {
 		} else if (nextCharIsLetter(statementScanner)) {
 			parseAssigntment(statement);
 		} else {
-			//System.out.printf("The input is: %s\n", statement);
 			throw new APException("Invalid statement found, please alter file\n");
 		}
 	}
@@ -51,8 +48,6 @@ public class Main {
 		Identifier id = parseIdentifier(assignment.next());
 		SetInterface<BigInteger> value = parseExpression(assignment.next());
 		variables.put(id, value);
-		//System.out.println("END OF STATEMENT--------------------------------------------------------------");
-		//System.out.println();
 	}
 
 
@@ -60,30 +55,23 @@ public class Main {
 		statement = statement.substring(1);
 		SetInterface<BigInteger> result = parseExpression(statement);
 		out.println(result.toString());
-		//System.out.println("END OF STATEMENT--------------------------------------------------------------");
-		//System.out.println();
 	}
 
 
 	SetInterface<BigInteger> parseExpression(String expressionString) throws APException {
-		//System.out.printf(expressionString + " expressionstring IS NOW\n");
 		int numberOfParsedTerms = 0;
 		SetInterface<BigInteger> expression = null;
 		String operatorString = computeOperatorString(expressionString);
 		String found = "";
 		int count = 0;
 		while(expressionString.length() > 0) {
-			//System.out.printf(expressionString + " EXPRESSION IS NOW\n");
 			if (expressionString.charAt(0) == '(') {
-				//System.out.printf(expressionString + " TWICE\n");
-				//System.out.println(" PARENTHESIS BRANCH");
 				for (int i = 0; i < expressionString.length(); i++) {
 					if (expressionString.charAt(i) == '(') {
 						count++;
 					} else if (expressionString.charAt(i) == ')') {
 						count--;
 					}else if(i == expressionString.length()-1){
-						//System.out.println("THIS");
 						found = found + expressionString;
 						expressionString = "";
 						parseTerm(found);
@@ -91,28 +79,22 @@ public class Main {
 
 
 					if (count == 0) {
-						//System.out.println("THAT");
 						found = found + expressionString.substring(0, i+1);
 						expressionString = expressionString.substring(i+1);
-						//System.out.printf(expressionString + " what do you contain??\n");
 						break;
 					}
 				}
 			}
 
 			if(expressionString.length() != 0 && expressionString.charAt(0) != '(') {
-				//System.out.println("BRANCH");
-				//System.out.printf(expressionString + " should start with *\n");
 				for (int i = 0; i < expressionString.length(); i++) {
 					if (expressionString.charAt(i) == '+' || expressionString.charAt(i) == '-' || expressionString.charAt(i) == '|') {
 						found = found + expressionString.substring(0, i);
-						//System.out.printf(found + " Wwe should not see this\n");
 						expressionString = expressionString.substring(i);
 						break;
 					}
 					if(i == expressionString.length()-1){
 						found = found + expressionString;
-						//System.out.printf(found + " WHATS THIS FOUND\n");
 						expressionString = "";
 					}
 				}
@@ -122,39 +104,26 @@ public class Main {
 			if(expressionString.length() > 0 && expressionString.charAt(0) != '*') {
 				expressionString = expressionString.substring(1);
 			}
-			//System.out.println();
-			//System.out.println( "FOUND" + found + " FOUND");
-			//System.out.printf(expressionString + " EXPRESSION STRING ++++++\n");
-			//System.out.println(numberOfParsedTerms + " NUMBER");
-			//System.out.println(numberOfParsedTerms + "PARSED");
 			String foundDelete = found;
-			//System.out.println(operatorString + "OPERATORS");
 			if (numberOfParsedTerms == 0) {
-				//System.out.println("expression TADA ");
-				//System.out.println( "MAGIC" + found + " MAGIC");
 				expression = parseTerm(found);
 				found = "";
-				//System.out.println("expression contains: " + expression.toString());
 				numberOfParsedTerms++;
 			} else {
 				if(operatorString.length() > 0) {
 					if (operatorString.charAt(0) == '+') {
-						//System.out.println("UNION");
 						SetInterface<BigInteger> termToUnion = parseTerm(found);
 						found = "";
 						expression = expression.union(termToUnion);
-						//System.out.println(expression.toString() + " expression");
 						operatorString = operatorString.substring(1);
 						numberOfParsedTerms++;
 					} else if (operatorString.charAt(0) == '-') {
-						//System.out.println("COMPLEMENT");
 						SetInterface<BigInteger> termToComplement = parseTerm(found);
 						found = "";
 						expression = expression.complement(termToComplement);
 						operatorString = operatorString.substring(1);
 						numberOfParsedTerms++;
 					} else if (operatorString.charAt(0) == '|') {
-						//System.out.println("SYMDIFFERNCE");
 						SetInterface<BigInteger> termToSymDifference = parseTerm(found);
 						found = "";
 						expression = expression.symDifference(termToSymDifference);
@@ -165,7 +134,6 @@ public class Main {
 					throw new APException("Invalid expression, all terms in expression should be seperated by addetive operator and complex terms should be closed");
 				}
 			}
-			//System.out.println(expression.toString() + " elements of term of "  + foundDelete + "\n");
 		}
 		return expression;
 	}
@@ -193,10 +161,6 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseTerm(String termString) throws APException{
-		//System.out.println(termString + " TermString FOR PARSETERM!!!!");
-		//Scanner factorChain = new Scanner(termString);
-		//TODO fix complex factors containing *
-		//factorChain.useDelimiter("\\*");
 		int numberOfParsedFactors = 0;
 		SetInterface<BigInteger> term = null;
 		String found = "";
@@ -243,22 +207,16 @@ public class Main {
 				termString = termString.substring(1);
 			}
 
-
-			//System.out.println("THE TERMSTRING IS: " + termString);
-			//System.out.println( "FOUND" + found + " FOUND");
-			String foundDelete = found;
 			if(numberOfParsedFactors == 0){
 				term = parseFactor(found);
 				found = "";
 				numberOfParsedFactors++;
 			}else{
-				//System.out.println("INTERSECT");
 				SetInterface<BigInteger> factorToIntersect = parseFactor(found);
 				term = term.intersection(factorToIntersect);
 				found = "";
 				numberOfParsedFactors++;
 			}
-			//System.out.println(term.toString() + " elements of factor  of "  + foundDelete + "\n");
 		}
 		return term;
 	}
@@ -287,20 +245,16 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseFactor(String factor) throws APException{
-		//System.out.println(factor + "FACTOR");
 		Scanner factorScanner = new Scanner(factor);
 		SetInterface<BigInteger> set;
 		if(nextCharIsLetter(factorScanner)){
 			Identifier id = parseIdentifier(factor);
-			//System.out.println("boolean" + variables.containsKey(id));
 			if (variables.containsKey(id)) {
 				set = variables.get(id);
 			}else{
 				throw new APException("Invalid set, set never initialized\n");
 			}
 		}else if(nextCharEqualsInput(factorScanner, '(')){
-			//TODO use correct delimeter
-			//System.out.println("THIS ONE??");
 			set = parseComplexFactor(factor);
 		}else if(nextCharEqualsInput(factorScanner, '{')){
 			set = parseSet(factor);
@@ -317,7 +271,6 @@ public class Main {
 		identifierScanner.useDelimiter("");
 		while(identifierScanner.hasNext()){
 			String character = identifierScanner.next();
-			//System.out.println(character + "CHARACTER");
 			boolean validChar = identifier.readValidChar(character);
 			if (!validChar){
 				throw new APException("Invalid Identifier, Identifiers should start with a letter and only contain letters and numbers\n");
@@ -328,7 +281,6 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseComplexFactor(String complexFactor) throws  APException{
-		//System.out.println(complexFactor + " COMPLEX");
 		SetInterface<BigInteger> set;
 		if(complexFactor.charAt(complexFactor.length() - 1) == ')'){
 			String expression = complexFactor.substring(1, complexFactor.length() -1);
@@ -341,11 +293,9 @@ public class Main {
 
 
 	SetInterface<BigInteger> parseSet(String set) throws APException{
-		//System.out.println(set + " SET");
 		SetInterface<BigInteger> parsedSet = new Set<>();
 		if(set.charAt(set.length() - 1) == '}'){
 			String rowOfNaturalNumbers = set.substring(1, set.length() -1);
-			//String rowOfNaturalNumbers = set;
 			//returns empty set
 			if(rowOfNaturalNumbers.length() == 0){
 				return parsedSet;
@@ -438,7 +388,7 @@ public class Main {
 		return  in.hasNext("\\*");
 	}
 
-    private void start() {
+    private void start()throws APException {
         Scanner in = new Scanner(System.in);
 
         while(in.hasNextLine()) {
@@ -448,14 +398,19 @@ public class Main {
 				parseStatement(statement);
 			}
 			catch (APException e) {
-				out.println(e);
+				throw new APException("No statement");
+				//out.println(e);
 			}
 		}
         in.close();
     }
 
 
-    public static void main(String[] argv) {
-        new Main().start();
+    public static void main(String[] argv)throws APException {
+		try {
+			new Main().start();
+		}catch (APException e){
+			System.out.println(e.getMessage()); 
+		}
     }
 }

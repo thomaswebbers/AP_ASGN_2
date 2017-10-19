@@ -60,6 +60,7 @@ def main():
             output, stderr = get_output(args.jar, input)
             if len(stderr) > 0:
                 raise TestFailure("Program outputted errors:\n%s" % stderr)
+            #print output, input, expected
             compare(output, expected)
             log("Passed test %s!" % test, "SUCCESS")
         log("All tests passed!", "SUCCESS")
