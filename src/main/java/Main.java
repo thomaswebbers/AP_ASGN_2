@@ -37,7 +37,7 @@ public class Main {
 		} else if (nextCharIsLetter(statementScanner)) {
 			parseAssigntment(statement);
 		} else {
-			throw new APException("Invalid statement found, please alter file\n");
+			throw new APException("Invalid statement found, please alter file");
 		}
 	}
 
@@ -46,8 +46,12 @@ public class Main {
 		Scanner assignment = new Scanner(statement);
 		assignment.useDelimiter("=");
 		Identifier id = parseIdentifier(assignment.next());
-		SetInterface<BigInteger> value = parseExpression(assignment.next());
-		variables.put(id, value);
+		if(assignment.hasNext()){
+			SetInterface<BigInteger> value = parseExpression(assignment.next());
+			variables.put(id, value);
+		}else{
+			throw new APException("Invalid statement found no value after identifier");
+		}
 	}
 
 
@@ -66,15 +70,18 @@ public class Main {
 		int count = 0;
 		while(expressionString.length() > 0) {
 			if (expressionString.charAt(0) == '(') {
+				//System.out.println("B ONE");
 				for (int i = 0; i < expressionString.length(); i++) {
 					if (expressionString.charAt(i) == '(') {
 						count++;
 					} else if (expressionString.charAt(i) == ')') {
 						count--;
-					}else if(i == expressionString.length()-1){
+					}
+					if(i == expressionString.length()-1){
 						found = found + expressionString;
 						expressionString = "";
 						parseTerm(found);
+						break;
 					}
 
 
@@ -87,11 +94,19 @@ public class Main {
 			}
 
 			if(expressionString.length() != 0 && expressionString.charAt(0) != '(') {
+				//System.out.println("B TWO");
 				for (int i = 0; i < expressionString.length(); i++) {
-					if (expressionString.charAt(i) == '+' || expressionString.charAt(i) == '-' || expressionString.charAt(i) == '|') {
-						found = found + expressionString.substring(0, i);
-						expressionString = expressionString.substring(i);
-						break;
+					if (expressionString.charAt(i) == '(') {
+						count++;
+					} else if (expressionString.charAt(i) == ')') {
+						count--;
+					}
+					if(count == 0){
+						if (expressionString.charAt(i) == '+' || expressionString.charAt(i) == '-' || expressionString.charAt(i) == '|') {
+							found = found + expressionString.substring(0, i);
+							expressionString = expressionString.substring(i);
+							break;
+						}
 					}
 					if(i == expressionString.length()-1){
 						found = found + expressionString;
@@ -104,7 +119,6 @@ public class Main {
 			if(expressionString.length() > 0 && expressionString.charAt(0) != '*') {
 				expressionString = expressionString.substring(1);
 			}
-			String foundDelete = found;
 			if (numberOfParsedTerms == 0) {
 				expression = parseTerm(found);
 				found = "";
@@ -131,7 +145,7 @@ public class Main {
 						numberOfParsedTerms++;
 					}
 				}else{
-					throw new APException("Invalid expression, all terms in expression should be seperated by addetive operator and complex terms should be closed");
+					throw new APException("Invalid expression, all terms in expression should be separated by addetive operator");
 				}
 			}
 		}
@@ -173,10 +187,12 @@ public class Main {
 						count++;
 					} else if (termString.charAt(i) == ')') {
 						count--;
-					}else if(i == termString.length()-1){
+					}
+					if(i == termString.length()-1){
 						found = found + termString;
 						termString = "";
 						parseFactor(found);
+						break;
 					}
 
 
@@ -252,14 +268,14 @@ public class Main {
 			if (variables.containsKey(id)) {
 				set = variables.get(id);
 			}else{
-				throw new APException("Invalid set, set never initialized\n");
+				throw new APException("Invalid set, set never initialized");
 			}
 		}else if(nextCharEqualsInput(factorScanner, '(')){
 			set = parseComplexFactor(factor);
 		}else if(nextCharEqualsInput(factorScanner, '{')){
 			set = parseSet(factor);
 		}else{
-			throw new APException("Invalid factor make sure all factors start with a \"letter\", a \"(\" or a \"{\" \n");
+			throw new APException("Invalid factor make sure all factors start with a \"letter\", a \"(\" or a \"{\" ");
 		}
 		return set;
 	}
@@ -273,7 +289,7 @@ public class Main {
 			String character = identifierScanner.next();
 			boolean validChar = identifier.readValidChar(character);
 			if (!validChar){
-				throw new APException("Invalid Identifier, Identifiers should start with a letter and only contain letters and numbers\n");
+				throw new APException("Invalid Identifier, Identifiers should start with a letter and only contain letters and numbers");
 			}
 		}
 		return identifier;
@@ -287,7 +303,7 @@ public class Main {
 			set = parseExpression(expression);
 			return set;
 		}else{
-			throw new APException(" Invalid complex factor, complex factor never closed\n");
+			throw new APException("Invalid complex factor, complex factor never closed");
 		}
 	}
 
@@ -300,6 +316,19 @@ public class Main {
 			if(rowOfNaturalNumbers.length() == 0){
 				return parsedSet;
 			}else{
+				//checks if set doesn't contain null element at the start of the set
+				if(rowOfNaturalNumbers.charAt(0) == ','){
+					throw new APException("Invalid number in set, set starts with null element");
+				}
+				//checks if set doesn't contain null element in the middle
+				if(set.contains(",,")){
+					throw new APException("Invalid number in set, set contains null element");
+				}
+
+				if(rowOfNaturalNumbers.charAt(rowOfNaturalNumbers.length() -1) == ','){
+					throw new APException("Invalid number in set, set ends with null element");
+				}
+
 				Scanner setScanner = new Scanner(rowOfNaturalNumbers);
 				setScanner.useDelimiter(",");
 				//fills set and then returns it
@@ -311,7 +340,7 @@ public class Main {
 			}
 		}else{
 			System.out.println(set);
-			throw new APException("Invalid set, set never closed\n");
+			throw new APException("Invalid set, set never closed");
 		}
 	}
 
@@ -330,16 +359,19 @@ public class Main {
 
 
 	BigInteger parsePositiveNumber(String nonZeroNumber) throws  APException{
-		if(nonZeroNumber.charAt(0) == 0){
-			throw new APException("Invalid number in set, set contains non number starting with 0\n");
+
+		if(nonZeroNumber.charAt(0) == '0'){
+			throw new APException("Invalid number in set, set contains non zero number starting with 0");
 		}
 
-		Scanner positiveNumberScanner = new Scanner(nonZeroNumber);
+		if(nonZeroNumber.charAt(0) == ' '){
+			throw new APException("Invalid number in set, set contains a null element");
+		}
+
 		for(int i = 1; i < nonZeroNumber.length(); i++){
-			if(!nextCharIsNumber(positiveNumberScanner)){
-				throw new APException("Invalid number in set, set contains non number element\n");
+			if( Character.isLetter(nonZeroNumber.charAt(i))){
+				throw new APException("Invalid number in set, set contains non number element");
 			}
-			positiveNumberScanner.next();
 		}
 		BigInteger positiveNumber = new BigInteger(nonZeroNumber);
 		return positiveNumber;
@@ -388,29 +420,28 @@ public class Main {
 		return  in.hasNext("\\*");
 	}
 
-    private void start()throws APException {
-        Scanner in = new Scanner(System.in);
+	private void start()throws APException {
+		Scanner in = new Scanner(System.in);
 
-        while(in.hasNextLine()) {
+		while(in.hasNextLine()) {
 			String statement = in.nextLine();
 
-			try {
+			if(statement.length() == 0){
+				System.out.println("error: no statment");
+				continue;
+			}
+
+			try{
 				parseStatement(statement);
-			}
-			catch (APException e) {
-				throw new APException("No statement");
-				//out.println(e);
+			}catch (APException e){
+				System.out.println(e.getMessage());
 			}
 		}
-        in.close();
-    }
+		in.close();
+	}
 
 
-    public static void main(String[] argv)throws APException {
-		try {
+	public static void main(String[] argv)throws APException {
 			new Main().start();
-		}catch (APException e){
-			System.out.println(e.getMessage()); 
-		}
-    }
+	}
 }
